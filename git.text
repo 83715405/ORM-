@@ -5,4 +5,5 @@ git add . 提交到暂存区
 git commit -m "说明"  提交暂存区文件到本地仓库
 git log 查看历史版本
 git log --graph --pretty=oneline 查看历史版本
-git status 查看本地状态
+git status 查看本地状态(如果无修改显示干净的工作区,如果有修改没有提交到暂存区会显示红色, 如果已保存到暂存区没有提交到本地仓库会显示绿色)
+
