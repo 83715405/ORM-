@@ -14,4 +14,5 @@ git reset --hard HEAD^^ 回到上上个版本
 git reflog 查看所有历史版本(git log只能查看当前版本之前的版本, git reflog可以查看所有版本(之前和之后的都能看到))
 当回退的版本太多,项跳刀后面版本,只要知道版本号就可以了,git reflog 和git reset --hard 版本号可以直接切换到制定版本
 git checkout 文件名  如果当前工作区代码被该乱了,  还原使用checkout命令
-git checkout . 重置当前项目夏所有文件
+git checkout . 重置当前项目夏所有文件,但是如果已经提交到暂存区,没有提交到本地仓库就无法重置
+git reset --hard HEAD 可以重置提交到暂存区的代码
