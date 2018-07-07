@@ -16,3 +16,6 @@ git reflog 查看所有历史版本(git log只能查看当前版本之前的版�
 git checkout 文件名  如果当前工作区代码被该乱了,  还原使用checkout命令
 git checkout . 重置当前项目夏所有文件,但是如果已经提交到暂存区,没有提交到本地仓库就无法重置
 git reset --hard HEAD 可以重置提交到暂存区的代码
+git branch 查看分支前框
+git branch 分支名 常见分支
+git checkout 分支名 切换分支
