@@ -19,7 +19,11 @@ git reset --hard HEAD 可以重置提交到暂存区的代码
 git branch 查看分支前框
 git branch 分支名 常见分支
 git checkout 分支名 切换分支
+
+
+
 总结git checkout 
 git checkout 文件名 重置工作区制定文件
 git checkout . 重置工作区所有文件
 git checkout 分支名   切换分支
+git checkout -b 分支名  创建并切换分支
