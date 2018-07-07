@@ -36,4 +36,23 @@ git checkout -b 分支名  创建并切换分支
 增加了dev2的代码
 git stash 保存工作状态到工作状态保存栈
 git stash pop 恢复工作状态
+git 通信协议
+git 支持多种协议,包括https, SSL
+使用SSL协议速度快但是在某些指开放http端口的公司,内部就无法使用ssl协议了而只能用https了
+相比ssl,使用https速度比较慢,而且每次通过终端上传代码到远程仓库时都必须输入账号密码
+配置SSH密钥对
+Git服务器会使用SSH密钥对来确认代码提交者的身份
+登陆github网站注册github账号
+创建SSH密钥对
+通过文件管理器进入到ubuntu/home/用户名目录下,ctrl+h显示隐藏文件,查看是否有.ssh目录
+如果有.ssh目录,则把他删除
+进入到终端执行如下命令
+ssh-keygen -t rsa -C 你的邮箱
+不需要输入,连按三次回车则会重新生成.ssh目录,在该目录夏会生成新创建出来的密钥对.其中,id_rsa.pub为公钥
+查看生成的id_rsa.pub公钥
+会输出类似以下的字符串,即:公钥字符串
+ssh-rsadfdsfsdfzdsfdsfsdfdsfsdvv 83715405@qqcom
+把上述的公钥字符串配置到GitHub的后台
+登陆GitHub点击头像 -> setting -> SSH And GPG keys -> New SSH Keys:
+验证是否成功 ssh -T 83725405@qqcom
 
