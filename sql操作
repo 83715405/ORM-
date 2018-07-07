@@ -1,0 +1,287 @@
+字段类型
+使用时需要引入django.db.models包，字段类型如下：
+AutoField：
+自动增长的IntegerField，通常不需要指定，Django会自动创建属性名为id的自动增长属性。
+BooleanField：
+布尔字段，值为True或False
+NullBooleanField:
+支持Null、True、False三种值。
+CharField (max_length=字符个数)：
+字符串 必须指定的参数： max_length 最大字符个数
+TextField：
+大文本字段，一般超过4000个字符时使用。
+DateField：[auto_now=False, auto_now_add=False]：
+日期
+参数auto_now表示每次保存对象时，自动设置该字段为当前时间，用于”最后一次修改”的时间戳，它总是使用当前日期，默认为false。
+参数auto_now_add表示当对象第一次被创建时自动设置当前时间，用于创建的时间戳，它总是使用当前日期，默认为false。
+参数auto_now_add和auto_now是互斥的，不能在同时使用到一个类属性中。
+TimeField：
+时间，参数同DateField。
+DateTimeField:
+日期时间，参数同DateField。
+IntegerField：
+整数。在Django所支持的所有数据库中， 从 -2147483648 到 2147483647 范围内的值是合法的
+DecimalField (max_digits=None, decimal_places=None)：
+十进制浮点数，用python中的Decimal实例来表示，适合用来保存金额。
+必须指定参数： max_digits总位数，decimal_places小数位数。
+例：最大值：99.99 — DecimalField (max_digits=4, decimal_places=2)
+FloatField:
+浮点数，用python中的float来表示，有误差。
+FileField：
+上传文件字段
+ImageField：
+继承于FileField，对上传的内容进行校验，确保是有效的图片。
+注意： 只要修改了表字段的类型，就需要重新生成迁移文件并执行迁移操作。
+字段选项
+通过选项实现对数据库表字段的约束：
+选项	默认值	描述	是否要重新迁移修改表结构
+null	False	如果为True，数据库中字段允许为空	是
+unique	False	True表示这个字段在表中必须有唯一值	是
+db_column	属性名称	字段名，如果未指定，则使用属性的名称	是
+primary_key	False	若为True，则该字段会成为模型的主键字段，一般作为AutoField的选项使用	是
+default	-	默认值	否
+blank	False	True，html页面表单验证时字段允许为空	否
+editable	True	如果设为False, 这个字段将不会出现在管理后台	否
+choices	-	True，html页面表单验证时字段允许为空	否
+
+choices选项
+模型类 性别 字段中使用choices选项
+  class Employee(models.Model):
+      """员工类"""
+      SEX_CHOICES = (
+          (0, '男'),
+          (1, '女'),
+      )
+      # 性别
+      sex = models.IntegerField(default=0, choices=SEX_CHOICES)
+对于整型数据，管理后台默认显示为编辑框， 使用choices后显示为 选择下拉框，
+Meta类
+一、修改表名:
+Django默认生成的表名
+  应用名小写_模型类名小写
+可以通过在模型类中定义Meta类，来修改表名：
+  class Department(models.Model):
+      """部门类"""
+      ...
+      class Meta:
+           # 修改表名
+           db_table = "department"
+重新生成迁移文件，并迁移生成表,查看表名是否有修改
+二、 修改模型类在管理后台的显示名称
+class Meta:
+    ...
+    # 定义在管理后台显示的名称
+    verbose_name = "部门"
+    # 定义在管理后台显示的名称, 复数形式
+    verbose_name_plural = verbose_name
+查询
+每个模型类默认都有一个叫?objects?的类属性，它由django自动生成，类型为：?django.db.models.manager.Manager，可以把它叫?模型管理器：
+  >>> Employee.objects
+  <django.db.models.manager.Manager object at 0x7fcfcdf67550>
+objects模型管理器中提供了一些查询数据的方法：
+objects管理器中的方法	返回类型	作用
+模型类.objects.get()	模型对象	返回一个对象，且只能有一个:?
+如果查到多条数据，则报：MultipleObjectsReturned?
+如果查询不到数据，则报：DoesNotExist
+模型类.objects.all()	QuerySet	返回所有的对象
+模型类.objects.filter()	QuerySet	返回满足条件的对象
+模型类.objects.exclude()	QuerySet	返回不满条件的对象
+模型类.objects.order_by()	QuerySet	对查询结果集进行排序
+模型类.objects.aggregate()	字典，例如：
+{‘salary__avg’: 9500.0}	进行聚合操作
+Sum, Count, Max, Min, Avg
+模型类.objects.count()	数字	返回查询集中对象的数目
+准备测试数据
+往数据库表中，通过资料提供的dep.sql，插入后续功能演示的测试数据，操作步骤：
+i.
+对模型类作修改：
+员工表新增了hire_date入职时间字段
+员工表的comment备注信息字段可以为空
+代码参考如下：
+  class Department(models.Model):
+      """部门类"""
+      # 部门名称：字符串类型(必须要指定最大长度)
+      name = models.CharField(max_length=20)
+      # 部门成立时间: 日期类型
+      create_date = models.DateField(auto_now_add=True)
+      def __str__(self):
+          return self.name
+  class Employee(models.Model):
+      """员工类"""
+      name = models.CharField(max_length=20)
+      age = models.IntegerField()
+      sex = models.IntegerField(default=0)
+      # 工资：浮点类型（必须要指定两个选项）  999999.99
+      salary = models.DecimalField(max_digits=8, decimal_places=2)
+      # 备注信息: 可以为空
+      comment = models.CharField(max_length=300, null=True, blank=True)
+      # 员工入职时间
+      hire_date = models.DateField(auto_now_add=True)
+      # 一对多的外键：员工所属部门 department_id
+      department = models.ForeignKey('Department')
+      def __str__(self):
+          return self.name
+删除掉之前数据库，再重新创建
+删除掉生成的迁移文件
+重新生成迁移文件并执行迁移操作
+插入测试数据：
+ insert in
+查看测试数据，看有没有插入成功
+filter方法
+filter方法用来实现条件查询，返回QuerySet对象，包含了所有满足条件的数据。
+通过方法参数，指定查询条件：
+模型类.objects.filter(模型类属性名__条件名 = 值)
+判等： exact
+模糊查询： contains / endswith / startswith
+空查询： isnull
+范围查询: in
+比较查询: gt(greater than)、lt(less than)、gte、lte
+日期查询： year、month、day、week_day、hour、minute、second
+omysql：
+date函数： date(‘2017-1-1’)
+	year函数: year(hire_date)
+opython：
+date类: date(2017,1,1)
+exclude方法
+返回不满足条件的数据：
+用法： 模型类.objects.exclude(条件)
+F对象
+?之前的查询都是对象属性与常量值比较，如果要比较两个属性怎么做呢？ 答：使用F对象
+F对象作用： 比较表中的两个字段
+用法：?F(‘属性名’)
+使用之前需要先导入：
+  from django.db.models import F
+Q对象
+?作用： 对查询条件进行?与 或 非?（& | ~） 的逻辑操作
+用法：
+o与： Q(查询条件1) & Q(查询条件2)
+o或： Q(查询条件1) | Q(查询条件2)
+非： ~Q(查询条件)
+提示： 使用时需要先导入?from django.db.models import Q
+order_by方法
+作用： 对查询结果进行排序,?默认升序
+用法：
+升序：?模型类.objects.order_by(‘字段名’)
+降序：?模型类.objects.order_by(‘-字段名’)
+aggregate方法
+作用： 聚合操作，对多行查询结果中的一列进行操作，返回一个值。
+用法：?模型类.objects.aggregate（聚合类（’模型属性’））
+常用聚合类有：Sum, Count, Max, Min, Avg等
+返回值是一个字典, 格式： {‘属性名__聚合函数’: 值}
+需先导入聚合类：
+  from django.db.models import Sum, Count, Max, Min, Avg
+count方法
+作用：统计满足条件的对象的个数，返回值是一个数字
+用法：?模型类.objects.count()
+查看ORM语句
+可以通过查看mysql的日志文件，了解Django ORM 生成出来的sql语句。
+配置查看mysql日志文件：
+打开mysqld.cnf文件，打开68 69两行的注释：
+sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf
+重启mysql服务
+ sudo service mysql restart
+查看mysql日志文件的内容
+ sudo tail -f /var/log/mysql/mysql.log
+tail命令: 默认会显示文件的末尾，会自动刷新显示文件最新内容。退出可按ctrl+c
+QuerySet查询集
+调用模型管理器的all,?filter,?exclude,?order_by方法会产生一个QuerySet，可以在QuerySet上继续调用这些方法，比如：QuerySet可以作取下标操作, 注意：下标不允许为负数:
+o取出QuerySet的第一条数据,
+o不存在会抛出IndexError异常
+QuerySet可以作切片?操作, 切片操作会产生一个新的QuerySet，注意：下标不允许为负数。
+QuerySet的get()方法
+o取出QuerySet的唯一一条数据
+oQuerySet不存在数据，会抛出：?DoesNotExist异常
+oQuerySet存在多条数据，会抛出：MultiObjectsReturned异常
+QuerySet的exists方法： QuerySet有一个exists方法，可以判断是否有数据。
+QuerySet的特性：
+o惰性查询：创建查询集不会访问数据库，直到使用查询集中的数据时，才会访问数据库。
+缓存：当首次查询，获取到查询集后缓存下来，再次查询时会使用之前缓存的数据；
+遍历使用了QuerySet中的所有的对象（比如通过 列表生成式）才会缓存
+ # 进入交互环境下，执行以下操作
+  # 得到查询集
+  deps = Department.objects.all()
+		  # 遍历所有数据， 会查询数据库
+  [dep.name for dep in deps]
+ # 使用缓存，不再查询数据库
+  [dep.name for dep in deps]
+使用索引或切片引用查询集数据，将不会缓存
+  # 得到查询集
+  deps = Department.objects.all()
+  # 会查询数据库
+  deps[0]
+  # 会查询数据库
+  deps[0]
+?
+关联查询
+在定义模型类时，可以指定三种关联关系，最常用的是一对多关系；
+假设在一对多关系中，一对应的类叫做一类，多对应的类叫做多类；
+一、通过对象进行关联查询
+由一类对象查询多类对象：
+  一类对象.多类名小写_set.all()
+由多类对象查询一类对象：
+  多类对象.关联属性
+二、通过模型类进行关联查询
+用法：
+通过多类的条件查询一类数据：
+一类名.objects.filter(多类名小写__多类属性名__条件名=值) 
+通过一类的条件查询多类数据：
+多类名.objects.filter(关联属性__一类属性名__条件名=值)
+提示：会生成内连接语句进行查询，?条件名为in,gt,?isnull等
+示例：
+ 例1：查询部门信息，要求部门中员工的名字包含'马'
+ 例2：查询部门信息，要求部门中的员工的年龄大于30
+ 例3：查询部门为“研发部”的所有员工
+自关联
+自关联是一种特殊的一对多的关系：
+自关联关联属性定义：
+# 区域表自关联属性：特殊的一对多
+关联属性 = models.ForeignKey('self')
+需求： 查询出广州市的上级区域和下级区域
+o资料中提供了测试数据：area.sql
+o往数据库表插入测试数据：?区域表sql语句
+o广州市的id为232
+o在python环境中，查询出广州市的上级区域和下级区域
+步骤：
+添加区域模型类
+ class Area(models.Model):
+     """区域类： 保存省份 城市 区县"""
+     # 区域名称
+     title = models.CharField(max_length=30)
+     # 关联属性：自关联 (表示上级区域)
+     parent = models.ForeignKey('self', null=True, blank=True)
+     def __str__(self):
+         return self.title
+迁移生成表
+插入测试数据，并查看是否插入成功
+参考资料:?区域sql语句
+进入python交互环境，编写orm查询代码，查询出广州市的上级区域和下级区域
+ area = Area.objects.get(id=232)
+ parent = area.parent;
+ children = area.area_set.all()
+增删改
+一、增删改实现
+增： 调用一个模型类对象的save方法， 就可以实现数据新增
+删： 模型类.filter(条件).delete()
+ 改： 模型类.filter(条件).update(属性1=值1，属性2=值2..)
+二、应用案例：新增和删除部门
+需求： 实现部门新增和逻辑删除
+实现参考
+逻辑删除： 给部门类新增?是否删除?的属性
+重新生成迁移文件，执行迁移操作
+定义视图函数，实现数据查询（业务逻辑）
+重定向（redirect函数）：服务器不返回页面给浏览器，而是让浏览器去请求一个url地址
+模板界面无需修改
+
+自定义模型管理器
+每个模型类默认都有一个?objects?类属性，可以把它叫?模型管理器。它由django自动生成，类型为?django.db.models.manager.Manager
+可以在模型类中自定义模型管理器，自定义后, Django将不再生成默认的?objects。
+一、以下两种情况需要自定义管理器
+重写模型管理器中现有的方法
+需求： 调用?Department.manager.all()时，返回的是?is_delete?等于False的部
+封装增删改查的方法
+需求： 在管理器类中，封装一个创建部门的方法，方便直接调用
+二、 实现参考
+自定义模型管理器
+在模型类中使用自定义的模型管理器
+ 在视图中使用自定义的模型管理器
+ 
