@@ -56,3 +56,13 @@ ssh-rsadfdsfsdfzdsfdsfsdfdsfsdvv 83715405@qqcom
 登陆GitHub点击头像 -> setting -> SSH And GPG keys -> New SSH Keys:
 验证是否成功 ssh -T 83725405@qqcom
 
+
+
+git remote add 项目名 url地址   上传文件到github
+git push -u 项目名 分支名
+
+
+下载github上的代码
+git clone url地址
+
+
